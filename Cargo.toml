@@ -7,7 +7,7 @@ edition = "2021"
 [dependencies]
 wasm-bindgen = { version = "0.2", features = ["serde-serialize"] }
 serde = { version = "1.0.124", features = ["derive"] }
-noah  = { git = "https://github.com/FindoraNetwork/noah", tag = "v0.4.3" } 
-noah-crypto = { git = "https://github.com/FindoraNetwork/noah", tag = "v0.4.3" }
-noah-algebra  = { git = "https://github.com/FindoraNetwork/noah", tag = "v0.4.3" }
+noah  = { git = "https://github.com/FindoraNetwork/noah", tag = "v0.4.5" }
+noah-crypto = { git = "https://github.com/FindoraNetwork/noah", tag = "v0.4.5" }
+noah-algebra  = { git = "https://github.com/FindoraNetwork/noah", tag = "v0.4.5" }
 ed25519-dalek = { package = "noah-ed25519-dalek",version = "4.0.0" }
