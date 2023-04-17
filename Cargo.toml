@@ -10,4 +10,5 @@ serde = { version = "1.0.124", features = ["derive"] }
 noah  = { git = "https://github.com/FindoraNetwork/noah", tag = "v0.4.5" }
 noah-crypto = { git = "https://github.com/FindoraNetwork/noah", tag = "v0.4.5" }
 noah-algebra  = { git = "https://github.com/FindoraNetwork/noah", tag = "v0.4.5" }
+noah-accumulators  = { git = "https://github.com/FindoraNetwork/noah", tag = "v0.4.5" }
 ed25519-dalek = { package = "noah-ed25519-dalek",version = "4.0.0" }
