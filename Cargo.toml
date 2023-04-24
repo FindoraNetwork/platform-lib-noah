@@ -15,3 +15,4 @@ ed25519-dalek = { package = "noah-ed25519-dalek",version = "4.0.0" }
 
 [features]
 lightweight = [ "noah/lightweight" ] # Minimize size for only AR2ABAR and ABAR2AR.
+parallel = ["noah/parallel"]
