@@ -1,11 +1,11 @@
 use {
     crate::{publickey::XfrPublicKey, secretkey::XfrSecretKey, signature::XfrSignature},
-    ed25519_dalek::{PublicKey, SecretKey},
     noah::keys::KeyPair as NoahXfrKeyPair,
     noah_algebra::prelude::*,
     serde::{Deserialize, Serialize},
     wasm_bindgen::prelude::*,
 };
+use noah::parameters::AddressFormat::{ED25519, SECP256K1};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[wasm_bindgen]
@@ -15,10 +15,18 @@ pub struct XfrKeyPair {
 }
 impl XfrKeyPair {
     pub fn generate<R: CryptoRng + RngCore>(prng: &mut R) -> Self {
-        let kp = ed25519_dalek::Keypair::generate(prng);
+        let kp = NoahXfrKeyPair::sample(prng, ED25519);
         XfrKeyPair {
-            pub_key: XfrPublicKey(kp.public),
-            sec_key: XfrSecretKey(kp.secret_key()),
+            pub_key: XfrPublicKey(kp.get_pk()),
+            sec_key: XfrSecretKey(kp.get_sk()),
+        }
+    }
+
+    pub fn generate_secp256k1<R: CryptoRng + RngCore>(prng: &mut R) -> Self {
+        let kp = NoahXfrKeyPair::sample(prng, SECP256K1);
+        XfrKeyPair {
+            pub_key: XfrPublicKey(kp.get_pk()),
+            sec_key: XfrSecretKey(kp.get_sk()),
         }
     }
 
@@ -63,17 +71,10 @@ impl NoahFromToBytes for XfrKeyPair {
     }
 
     fn noah_from_bytes(bytes: &[u8]) -> Result<Self> {
-        if bytes.len() == 64 {
-            Ok(XfrKeyPair {
-                sec_key: XfrSecretKey(
-                    SecretKey::from_bytes(&bytes[0..32]).c(d!(NoahError::DeserializationError))?,
-                ),
-                pub_key: XfrPublicKey(
-                    PublicKey::from_bytes(&bytes[32..64]).c(d!(NoahError::DeserializationError))?,
-                ),
-            })
-        } else {
-            Err(eg!("length must be 64"))
-        }
+        let nkp = NoahXfrKeyPair::noah_from_bytes(bytes)?;
+        Ok(Self{
+            pub_key: XfrPublicKey(nkp.get_pk()),
+            sec_key: XfrSecretKey(nkp.get_sk())
+        })
     }
 }

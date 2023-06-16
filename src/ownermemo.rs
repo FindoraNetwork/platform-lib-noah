@@ -40,11 +40,30 @@ impl NoahFromToBytes for ZeiHybridCipher {
 }
 impl OwnerMemo {
     pub fn into_noah(&self) -> NoahOwnerMemo {
-        NoahOwnerMemo {
-            key_type: KeyType::Ed25519,
-            blind_share_bytes: self.blind_share.to_bytes().to_vec(),
-            lock_bytes: self.lock.noah_to_bytes(),
+
+        let lock_bytes = self.lock.noah_to_bytes();
+
+        if lock_bytes.len() == 72 ||
+            lock_bytes.len() == 40 ||
+            lock_bytes.len() == 64 {
+            NoahOwnerMemo {
+                key_type: KeyType::Ed25519,
+                blind_share_bytes: self.blind_share.to_bytes().to_vec(),
+                lock_bytes: lock_bytes,
+            }
+        } else if lock_bytes.len() == 89 ||
+            lock_bytes.len() == 57 ||
+            lock_bytes.len() == 81{
+            NoahOwnerMemo {
+                key_type: KeyType::Secp256k1,
+                blind_share_bytes: self.blind_share.to_bytes().to_vec(),
+                lock_bytes: lock_bytes,
+            }
+        } else {
+            panic!("")
         }
+
+
     }
 
     pub fn from_noah(value: &NoahOwnerMemo) -> Result<Self> {
