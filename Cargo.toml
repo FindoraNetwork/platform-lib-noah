@@ -5,7 +5,7 @@ authors = ["FindoraNetwork"]
 edition = "2021"
 
 [dependencies]
-wasm-bindgen = { version = "0.2.87", features = ["serde-serialize"] }
+wasm-bindgen = { version = "0.2", features = ["serde-serialize"] }
 serde = { version = "1.0.124", features = ["derive"] }
 noah  = { git = "https://github.com/FindoraNetwork/noah", tag = "v0.4.9-1" }
 noah-crypto = { git = "https://github.com/FindoraNetwork/noah", tag = "v0.4.9-1" }
