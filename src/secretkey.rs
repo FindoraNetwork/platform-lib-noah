@@ -61,3 +61,46 @@ impl Hash for XfrSecretKey {
 }
 
 serialize_deserialize!(XfrSecretKey);
+
+
+#[cfg(test)]
+mod tests {
+    use rand_chacha::ChaChaRng;
+    use crate::noah_algebra::prelude::SeedableRng;
+    use crate::{XfrKeyPair, XfrSecretKey};
+    use crate::noah_algebra::serialization::NoahFromToBytes;
+
+    #[test]
+    pub fn test_old_secret_key_compatibility() {
+        let mut prng = ChaChaRng::seed_from_u64(2342935u64);
+
+        // generate ed25519 SK by old method
+        let old_kp = ed25519_dalek::Keypair::generate(&mut prng);
+        let old_sk = old_kp.secret_key();
+        let old_sk_bytes = old_sk.as_bytes();
+
+        let new_sk = XfrSecretKey::noah_from_bytes(old_sk_bytes).unwrap();
+        let new_sk_bytes = new_sk.noah_to_bytes();
+
+        assert_eq!(new_sk_bytes.as_slice(), old_sk_bytes);
+        assert_eq!(new_sk_bytes.len(), 32);
+    }
+
+    #[test]
+    pub fn test_new_sk() {
+        let mut prng = ChaChaRng::seed_from_u64(8734598u64);
+
+        let ed_kp = XfrKeyPair::generate(&mut prng);
+        let ed_sk = ed_kp.get_sk();
+
+        assert_eq!(ed_sk.noah_to_bytes().len(), 32);
+
+        let sp_kp = XfrKeyPair::generate_secp256k1(&mut prng);
+        let sp_sk = sp_kp.get_sk();
+
+        assert_eq!(sp_sk.noah_to_bytes().len(), 33);
+
+    }
+
+
+}

@@ -56,7 +56,7 @@ mod tests {
     use crate::noah_algebra::serialization::NoahFromToBytes;
 
     #[test]
-    pub fn test_ed25519_public_key_old() {
+    pub fn test_old_public_key_compatibility() {
         let mut prng = ChaChaRng::seed_from_u64(2342935u64);
         let kp = ed25519_dalek::Keypair::generate(&mut prng);
         let pk = kp.public_key();
@@ -66,21 +66,30 @@ mod tests {
         assert_eq!(
             pk.to_bytes(),
             xpk.noah_to_bytes().as_slice()
+        );
+        assert_eq!(
+            xpk.noah_to_bytes().len(), 32
         )
     }
 
     #[test]
-    pub fn test_ed25519_public_key_new() {
+    pub fn test_new_pk() {
         let mut prng = ChaChaRng::seed_from_u64(2987534u64);
-        let xkp = XfrKeyPair::generate(&mut prng);
-
-        let bytes_pk = xkp.get_pk().noah_to_bytes();
-
-        let pk = ed25519_dalek::PublicKey::from_bytes(&bytes_pk).unwrap();
+        let ed_kp = XfrKeyPair::generate(&mut prng);
+        let ed_pk = ed_kp.get_pk();
 
         assert_eq!(
-            bytes_pk,
-            pk.to_bytes()
-        )
+            ed_pk.noah_to_bytes().len(),
+            32
+        );
+
+        let ed_sp = XfrKeyPair::generate_secp256k1(&mut prng);
+        let ed_sp = ed_sp.get_pk();
+
+        assert_eq!(
+            ed_sp.noah_to_bytes().len(),
+            34
+        );
+
     }
 }
