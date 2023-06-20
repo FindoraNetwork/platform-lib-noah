@@ -1,6 +1,6 @@
 use {
     crate::signature::XfrSignature,
-    noah::keys::{PublicKey as NoahXfrPublicKey},
+    noah::keys::PublicKey as NoahXfrPublicKey,
     noah_algebra::{
         hash::{Hash, Hasher},
         prelude::*,
@@ -17,7 +17,6 @@ pub struct XfrPublicKey(pub(crate) NoahXfrPublicKey);
 serialize_deserialize!(XfrPublicKey);
 
 impl XfrPublicKey {
-
     pub fn verify(&self, message: &[u8], signature: &XfrSignature) -> Result<()> {
         self.0.verify(message, &signature.into_noah()?)
     }
@@ -50,10 +49,10 @@ impl Hash for XfrPublicKey {
 
 #[cfg(test)]
 mod tests {
-    use rand_chacha::ChaChaRng;
     use crate::noah_algebra::prelude::SeedableRng;
-    use crate::{XfrPublicKey, XfrKeyPair};
     use crate::noah_algebra::serialization::NoahFromToBytes;
+    use crate::{XfrKeyPair, XfrPublicKey};
+    use rand_chacha::ChaChaRng;
 
     #[test]
     pub fn test_old_public_key_compatibility() {
@@ -63,13 +62,8 @@ mod tests {
 
         let xpk = XfrPublicKey::noah_from_bytes(&pk.to_bytes()).unwrap();
 
-        assert_eq!(
-            pk.to_bytes(),
-            xpk.noah_to_bytes().as_slice()
-        );
-        assert_eq!(
-            xpk.noah_to_bytes().len(), 32
-        )
+        assert_eq!(pk.to_bytes(), xpk.noah_to_bytes().as_slice());
+        assert_eq!(xpk.noah_to_bytes().len(), 32)
     }
 
     #[test]
@@ -78,18 +72,11 @@ mod tests {
         let ed_kp = XfrKeyPair::generate(&mut prng);
         let ed_pk = ed_kp.get_pk();
 
-        assert_eq!(
-            ed_pk.noah_to_bytes().len(),
-            32
-        );
+        assert_eq!(ed_pk.noah_to_bytes().len(), 32);
 
         let ed_sp = XfrKeyPair::generate_secp256k1(&mut prng);
         let ed_sp = ed_sp.get_pk();
 
-        assert_eq!(
-            ed_sp.noah_to_bytes().len(),
-            34
-        );
-
+        assert_eq!(ed_sp.noah_to_bytes().len(), 34);
     }
 }

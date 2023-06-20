@@ -1,11 +1,9 @@
+use noah::keys::KeyType;
 use {
-    noah::{
-        keys::{Signature as NoahXfrSignature},
-    },
+    noah::keys::Signature as NoahXfrSignature,
     noah_algebra::{prelude::*, serialization::NoahFromToBytes},
     serde::Serializer,
 };
-use noah::keys::KeyType;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct XfrSignature(pub NoahXfrSignature);
@@ -13,7 +11,6 @@ pub struct XfrSignature(pub NoahXfrSignature);
 serialize_deserialize!(XfrSignature);
 
 impl XfrSignature {
-
     pub fn into_noah(&self) -> Result<NoahXfrSignature> {
         Ok(self.0.clone())
     }
@@ -41,10 +38,10 @@ impl NoahFromToBytes for XfrSignature {
 
 #[cfg(test)]
 mod tests {
-    use rand_chacha::ChaChaRng;
     use super::*;
-    use ed25519_dalek::Signer;
     use crate::XfrKeyPair;
+    use ed25519_dalek::Signer;
+    use rand_chacha::ChaChaRng;
 
     #[test]
     pub fn test_old_signature_compatibility() {
@@ -62,10 +59,7 @@ mod tests {
 
         assert_eq!(new_sig_bytes.len(), 64);
 
-        assert_eq!(
-            old_sig_bytes,
-            new_sig_bytes.as_slice()
-        );
+        assert_eq!(old_sig_bytes, new_sig_bytes.as_slice());
     }
 
     #[test]
@@ -78,7 +72,10 @@ mod tests {
         let ed_sign_bytes = ed_sign.noah_to_bytes();
 
         assert!(ed_kp.get_pk_ref().verify(msg.as_bytes(), &ed_sign).is_ok());
-        assert_eq!(ed_sign, XfrSignature::noah_from_bytes(ed_sign_bytes.as_slice()).unwrap());
+        assert_eq!(
+            ed_sign,
+            XfrSignature::noah_from_bytes(ed_sign_bytes.as_slice()).unwrap()
+        );
         assert_eq!(ed_sign_bytes.len(), 64);
 
         let sp_kp = XfrKeyPair::generate_secp256k1(&mut prng);
@@ -86,7 +83,10 @@ mod tests {
         let sp_sign_bytes = sp_sign.noah_to_bytes();
 
         assert!(sp_kp.get_pk_ref().verify(msg.as_bytes(), &sp_sign).is_ok());
-        assert_eq!(sp_sign, XfrSignature::noah_from_bytes(sp_sign_bytes.as_slice()).unwrap());
+        assert_eq!(
+            sp_sign,
+            XfrSignature::noah_from_bytes(sp_sign_bytes.as_slice()).unwrap()
+        );
         assert_eq!(sp_sign_bytes.len(), 66);
     }
 }

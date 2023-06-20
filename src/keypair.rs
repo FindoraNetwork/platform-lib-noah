@@ -1,3 +1,4 @@
+use noah::parameters::AddressFormat::{ED25519, SECP256K1};
 use {
     crate::{publickey::XfrPublicKey, secretkey::XfrSecretKey, signature::XfrSignature},
     noah::keys::KeyPair as NoahXfrKeyPair,
@@ -5,7 +6,6 @@ use {
     serde::{Deserialize, Serialize},
     wasm_bindgen::prelude::*,
 };
-use noah::parameters::AddressFormat::{ED25519, SECP256K1};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[wasm_bindgen]
@@ -72,9 +72,9 @@ impl NoahFromToBytes for XfrKeyPair {
 
     fn noah_from_bytes(bytes: &[u8]) -> Result<Self> {
         let nkp = NoahXfrKeyPair::noah_from_bytes(bytes)?;
-        Ok(Self{
+        Ok(Self {
             pub_key: XfrPublicKey(nkp.get_pk()),
-            sec_key: XfrSecretKey(nkp.get_sk())
+            sec_key: XfrSecretKey(nkp.get_sk()),
         })
     }
 }

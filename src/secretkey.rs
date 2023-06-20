@@ -1,9 +1,8 @@
+use noah::keys::KeyType::Ed25519;
 use {
     crate::{signature::XfrSignature, XfrKeyPair, XfrPublicKey},
-    ed25519_dalek::{SECRET_KEY_LENGTH as ED25519_SECRET_KEY_LENGTH},
-    noah::{
-        keys::{SecretKey as NoahXfrSecretKey, KeyType},
-    },
+    ed25519_dalek::SECRET_KEY_LENGTH as ED25519_SECRET_KEY_LENGTH,
+    noah::keys::{KeyType, SecretKey as NoahXfrSecretKey},
     noah_algebra::{
         hash::{Hash, Hasher},
         prelude::*,
@@ -11,22 +10,20 @@ use {
     },
     serde::Serializer,
 };
-use noah::keys::KeyType::Ed25519;
 
 #[derive(Debug, Clone, Eq, PartialOrd, PartialEq, Ord)]
 pub struct XfrSecretKey(pub(crate) NoahXfrSecretKey);
 
 impl XfrSecretKey {
-
     pub fn sign(&self, message: &[u8]) -> Result<XfrSignature> {
         let sig = self.0.sign(message)?;
         Ok(XfrSignature::from_noah(&sig)?)
     }
     pub fn into_keypair(&self) -> XfrKeyPair {
         let nkp = self.0.clone().into_keypair();
-        XfrKeyPair{
+        XfrKeyPair {
             pub_key: XfrPublicKey(nkp.get_pk()),
-            sec_key: XfrSecretKey(nkp.get_sk())
+            sec_key: XfrSecretKey(nkp.get_sk()),
         }
     }
     pub fn into_noah(&self) -> Result<NoahXfrSecretKey> {
@@ -43,7 +40,7 @@ impl NoahFromToBytes for XfrSecretKey {
         let bytes = self.0.noah_to_bytes();
         let typ = KeyType::from_byte(bytes[0]);
         if typ == Ed25519 {
-            bytes[1..ED25519_SECRET_KEY_LENGTH+1].to_vec()
+            bytes[1..ED25519_SECRET_KEY_LENGTH + 1].to_vec()
         } else {
             bytes
         }
@@ -62,13 +59,12 @@ impl Hash for XfrSecretKey {
 
 serialize_deserialize!(XfrSecretKey);
 
-
 #[cfg(test)]
 mod tests {
-    use rand_chacha::ChaChaRng;
     use crate::noah_algebra::prelude::SeedableRng;
-    use crate::{XfrKeyPair, XfrSecretKey};
     use crate::noah_algebra::serialization::NoahFromToBytes;
+    use crate::{XfrKeyPair, XfrSecretKey};
+    use rand_chacha::ChaChaRng;
 
     #[test]
     pub fn test_old_secret_key_compatibility() {
@@ -99,8 +95,5 @@ mod tests {
         let sp_sk = sp_kp.get_sk();
 
         assert_eq!(sp_sk.noah_to_bytes().len(), 33);
-
     }
-
-
 }

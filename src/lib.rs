@@ -13,7 +13,7 @@ pub use xfrbody::*;
 mod ownermemo;
 pub use ownermemo::*;
 
-pub use noah_algebra;
-pub use noah_crypto;
 pub use noah as noah_api;
 pub use noah_accumulators;
+pub use noah_algebra;
+pub use noah_crypto;
