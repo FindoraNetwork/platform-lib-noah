@@ -4,7 +4,7 @@ use {
     },
     noah_algebra::{prelude::*, serialization::NoahFromToBytes},
     noah_crypto::basic::hybrid_encryption::{Ctext, XPublicKey},
-    serde::{Deserialize, Serialize},
+    serde::{Deserialize, Serialize, Serializer},
 };
 
 /// Information directed to secret key holder of a BlindAssetRecord
@@ -18,8 +18,21 @@ pub struct OwnerMemo {
 #[serde(untagged)]
 pub enum BlindShare {
     CompressedEdwardsY(CompressedEdwardsY),
-    Vec(Vec<u8>),
+    BlindShareData(String, Data),
 }
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct Data(pub Vec<u8>);
+impl NoahFromToBytes for Data {
+    fn noah_to_bytes(&self) -> Vec<u8> {
+        self.0.clone()
+    }
+
+    fn noah_from_bytes(bytes: &[u8]) -> Result<Self> {
+        Ok(Data(bytes.to_vec()))
+    }
+}
+serialize_deserialize!(Data);
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 pub struct ZeiHybridCipher {
@@ -57,9 +70,9 @@ impl OwnerMemo {
                 blind_share_bytes: bs.noah_to_bytes(),
                 lock_bytes,
             },
-            BlindShare::Vec(v) => NoahOwnerMemo {
+            BlindShare::BlindShareData(_, v) => NoahOwnerMemo {
                 key_type: KeyType::Secp256k1,
-                blind_share_bytes: v,
+                blind_share_bytes: v.0,
                 lock_bytes,
             },
         }
@@ -74,7 +87,10 @@ impl OwnerMemo {
                 lock: ZeiHybridCipher::noah_from_bytes(&value.lock_bytes)?,
             }),
             KeyType::Secp256k1 => Ok(Self {
-                blind_share: BlindShare::Vec(value.blind_share_bytes.clone()),
+                blind_share: BlindShare::BlindShareData(
+                    "secp".parse().unwrap(),
+                    Data(value.blind_share_bytes.clone()),
+                ),
                 lock: ZeiHybridCipher::noah_from_bytes(&value.lock_bytes)?,
             }),
             KeyType::EthAddress => Err(eg!("not defined")),
@@ -111,7 +127,6 @@ mod tests {
             };
 
             let oom_bytes = serde_json::to_string(&oom).unwrap();
-            println!("{}", oom_bytes);
 
             let new_om: OwnerMemo = serde_json::from_str(oom_bytes.as_str()).unwrap();
             assert_eq!(nom, new_om.into_noah());
@@ -124,7 +139,6 @@ mod tests {
             };
 
             let oom_bytes = serde_json::to_string(&oom).unwrap();
-            println!("{}", oom_bytes);
 
             let new_om: OwnerMemo = serde_json::from_str(oom_bytes.as_str()).unwrap();
             assert_eq!(nom, new_om.into_noah());
@@ -139,7 +153,6 @@ mod tests {
             };
 
             let oom_bytes = serde_json::to_string(&oom).unwrap();
-            println!("{}", oom_bytes);
 
             let new_om: OwnerMemo = serde_json::from_str(oom_bytes.as_str()).unwrap();
             assert_eq!(nom, new_om.into_noah());
@@ -157,7 +170,6 @@ mod tests {
             let (nom, _) = NoahOwnerMemo::from_amount(&mut prng, 12345u64, &ed_pk.0).unwrap();
             let om = OwnerMemo::from_noah(&nom).unwrap();
             let om_bytes = serde_json::to_vec(&om).unwrap();
-            println!("{:?}", om_bytes);
 
             let new_om: OwnerMemo = serde_json::from_slice(om_bytes.as_slice()).unwrap();
 
@@ -198,7 +210,6 @@ mod tests {
             let om_bytes = serde_json::to_vec(&om).unwrap();
 
             let new_om: OwnerMemo = serde_json::from_slice(om_bytes.as_slice()).unwrap();
-
             assert_eq!(nom, new_om.into_noah())
         }
         {
