@@ -1,6 +1,6 @@
 use {
     crate::signature::XfrSignature,
-    noah::keys::PublicKey as NoahXfrPublicKey,
+    noah::{keys::PublicKey as NoahXfrPublicKey, parameters::AddressFormat::ED25519},
     noah_algebra::{
         hash::{Hash, Hasher},
         prelude::*,
@@ -10,14 +10,13 @@ use {
     wasm_bindgen::prelude::*,
 };
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd, Default)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd)]
 #[wasm_bindgen]
 pub struct XfrPublicKey(pub(crate) NoahXfrPublicKey);
 
 serialize_deserialize!(XfrPublicKey);
 
 impl XfrPublicKey {
-
     pub fn verify(&self, message: &[u8], signature: &XfrSignature) -> Result<()> {
         self.0.verify(message, &signature.into_noah()?)
     }
@@ -45,6 +44,12 @@ impl NoahFromToBytes for XfrPublicKey {
 impl Hash for XfrPublicKey {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.noah_to_bytes().hash(state)
+    }
+}
+
+impl Default for XfrPublicKey {
+    fn default() -> Self {
+        XfrPublicKey(NoahXfrPublicKey::default(ED25519))
     }
 }
 

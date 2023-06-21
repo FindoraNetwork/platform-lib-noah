@@ -7,6 +7,8 @@ use {
     serde::{Deserialize, Serialize, Serializer},
 };
 
+const SECP_KEY_IDENTIFIER: &str = "secp";
+
 /// Information directed to secret key holder of a BlindAssetRecord
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub struct OwnerMemo {
@@ -88,7 +90,7 @@ impl OwnerMemo {
             }),
             KeyType::Secp256k1 => Ok(Self {
                 blind_share: BlindShare::BlindShareData(
-                    "secp".parse().unwrap(),
+                    String::from(SECP_KEY_IDENTIFIER),
                     Data(value.blind_share_bytes.clone()),
                 ),
                 lock: ZeiHybridCipher::noah_from_bytes(&value.lock_bytes)?,
