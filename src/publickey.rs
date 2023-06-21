@@ -10,13 +10,14 @@ use {
     wasm_bindgen::prelude::*,
 };
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd, Default)]
 #[wasm_bindgen]
 pub struct XfrPublicKey(pub(crate) NoahXfrPublicKey);
 
 serialize_deserialize!(XfrPublicKey);
 
 impl XfrPublicKey {
+
     pub fn verify(&self, message: &[u8], signature: &XfrSignature) -> Result<()> {
         self.0.verify(message, &signature.into_noah()?)
     }
