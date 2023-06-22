@@ -17,7 +17,6 @@ pub struct XfrPublicKey(pub(crate) NoahXfrPublicKey);
 serialize_deserialize!(XfrPublicKey);
 
 impl XfrPublicKey {
-
     pub fn to_bytes(&self) -> Vec<u8> {
         self.noah_to_bytes()
     }

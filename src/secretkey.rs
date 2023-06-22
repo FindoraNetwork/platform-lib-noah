@@ -15,6 +15,9 @@ use {
 pub struct XfrSecretKey(pub(crate) NoahXfrSecretKey);
 
 impl XfrSecretKey {
+    pub fn to_bytes(&self) -> Vec<u8> {
+        self.noah_to_bytes()
+    }
     pub fn sign(&self, message: &[u8]) -> Result<XfrSignature> {
         let sig = self.0.sign(message)?;
         Ok(XfrSignature::from_noah(&sig)?)
