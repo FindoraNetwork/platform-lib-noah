@@ -1,6 +1,9 @@
 use {
     crate::signature::XfrSignature,
-    noah::{keys::PublicKey as NoahXfrPublicKey, parameters::AddressFormat::ED25519},
+    noah::{
+        keys::{PublicKey as NoahXfrPublicKey, PublicKeyInner},
+        parameters::AddressFormat::ED25519,
+    },
     noah_algebra::{
         hash::{Hash, Hasher},
         prelude::*,
@@ -31,6 +34,22 @@ impl XfrPublicKey {
 
     pub fn from_noah(value: &NoahXfrPublicKey) -> Result<Self> {
         Ok(Self(value.clone()))
+    }
+
+    pub fn is_ed25519(&self) -> bool {
+        match self.0.inner() {
+            PublicKeyInner::Ed25519(_) => true,
+            PublicKeyInner::Secp256k1(_) => false,
+            PublicKeyInner::EthAddress(_) => false,
+        }
+    }
+
+    pub fn is_secp256k1(&self) -> bool {
+        match self.0.inner() {
+            PublicKeyInner::Ed25519(_) => false,
+            PublicKeyInner::Secp256k1(_) => true,
+            PublicKeyInner::EthAddress(_) => false,
+        }
     }
 }
 
