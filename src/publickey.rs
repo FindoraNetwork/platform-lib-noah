@@ -1,3 +1,4 @@
+use noah::NoahError;
 use {
     crate::signature::XfrSignature,
     noah::{
@@ -24,15 +25,15 @@ impl XfrPublicKey {
         self.noah_to_bytes()
     }
 
-    pub fn verify(&self, message: &[u8], signature: &XfrSignature) -> Result<()> {
+    pub fn verify(&self, message: &[u8], signature: &XfrSignature) -> Result<(), NoahError> {
         self.0.verify(message, &signature.into_noah()?)
     }
 
-    pub fn into_noah(&self) -> Result<NoahXfrPublicKey> {
+    pub fn into_noah(&self) -> Result<NoahXfrPublicKey, NoahError> {
         Ok(self.0)
     }
 
-    pub fn from_noah(value: &NoahXfrPublicKey) -> Result<Self> {
+    pub fn from_noah(value: &NoahXfrPublicKey) -> Result<Self, NoahError> {
         Ok(Self(value.clone()))
     }
 
@@ -59,7 +60,7 @@ impl NoahFromToBytes for XfrPublicKey {
         self.0.noah_to_bytes()
     }
 
-    fn noah_from_bytes(bytes: &[u8]) -> Result<Self> {
+    fn noah_from_bytes(bytes: &[u8]) -> Result<Self, AlgebraError> {
         Ok(Self(NoahXfrPublicKey::noah_from_bytes(bytes)?))
     }
 }

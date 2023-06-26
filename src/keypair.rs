@@ -1,4 +1,5 @@
 use noah::parameters::AddressFormat::{ED25519, SECP256K1};
+use noah::NoahError;
 use {
     crate::{publickey::XfrPublicKey, secretkey::XfrSecretKey, signature::XfrSignature},
     noah::keys::KeyPair as NoahXfrKeyPair,
@@ -30,15 +31,15 @@ impl XfrKeyPair {
         }
     }
 
-    pub fn into_noah(&self) -> Result<NoahXfrKeyPair> {
+    pub fn into_noah(&self) -> Result<NoahXfrKeyPair, NoahError> {
         self.sec_key.clone().into_noah().map(|sk| sk.into_keypair())
     }
 
-    pub fn from_noah(value: &NoahXfrKeyPair) -> Result<Self> {
+    pub fn from_noah(value: &NoahXfrKeyPair) -> Result<Self, NoahError> {
         XfrSecretKey::from_noah(value.get_sk_ref()).map(|sk| sk.into_keypair())
     }
 
-    pub fn sign(&self, msg: &[u8]) -> Result<XfrSignature> {
+    pub fn sign(&self, msg: &[u8]) -> Result<XfrSignature, NoahError> {
         self.sec_key.sign(msg)
     }
 
@@ -70,7 +71,7 @@ impl NoahFromToBytes for XfrKeyPair {
         vec
     }
 
-    fn noah_from_bytes(bytes: &[u8]) -> Result<Self> {
+    fn noah_from_bytes(bytes: &[u8]) -> Result<Self, AlgebraError> {
         let nkp = NoahXfrKeyPair::noah_from_bytes(bytes)?;
         Ok(Self {
             pub_key: XfrPublicKey(nkp.get_pk()),

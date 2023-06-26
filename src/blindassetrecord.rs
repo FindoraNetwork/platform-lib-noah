@@ -1,3 +1,4 @@
+use noah::NoahError;
 use {
     crate::publickey::XfrPublicKey,
     noah::xfr::{
@@ -8,6 +9,7 @@ use {
     noah_algebra::prelude::*,
     serde::{Deserialize, Serialize},
 };
+
 /// A transfer input or output record as seen in the ledger
 /// Amount and asset type can be confidential or non confidential
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
@@ -31,7 +33,7 @@ impl BlindAssetRecord {
             AssetRecordType::NonConfidentialAmount_NonConfidentialAssetType
         )
     }
-    pub fn into_noah(&self) -> Result<NoahBlindAssetRecord> {
+    pub fn into_noah(&self) -> Result<NoahBlindAssetRecord, NoahError> {
         Ok(NoahBlindAssetRecord {
             amount: self.amount.clone(),
             asset_type: self.asset_type.clone(),
@@ -39,7 +41,7 @@ impl BlindAssetRecord {
         })
     }
 
-    pub fn from_noah(value: &NoahBlindAssetRecord) -> Result<Self> {
+    pub fn from_noah(value: &NoahBlindAssetRecord) -> Result<Self, NoahError> {
         Ok(Self {
             amount: value.amount.clone(),
             asset_type: value.asset_type.clone(),

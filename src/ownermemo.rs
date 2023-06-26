@@ -1,9 +1,10 @@
 use {
     noah::{
         keys::KeyType, ristretto::CompressedEdwardsY, xfr::structs::OwnerMemo as NoahOwnerMemo,
+        NoahError,
     },
     noah_algebra::{prelude::*, serialization::NoahFromToBytes},
-    noah_crypto::basic::hybrid_encryption::{Ctext, XPublicKey},
+    noah_crypto::hybrid_encryption::XPublicKey,
     serde::{Deserialize, Serialize, Serializer},
 };
 
@@ -20,25 +21,12 @@ pub struct OwnerMemo {
 #[serde(untagged)]
 pub enum BlindShare {
     CompressedEdwardsY(CompressedEdwardsY),
-    BlindShareData(String, Data),
+    BlindShareData(String, CompactByteArray),
 }
-
-#[derive(Clone, Debug, Eq, PartialEq)]
-pub struct Data(pub Vec<u8>);
-impl NoahFromToBytes for Data {
-    fn noah_to_bytes(&self) -> Vec<u8> {
-        self.0.clone()
-    }
-
-    fn noah_from_bytes(bytes: &[u8]) -> Result<Self> {
-        Ok(Data(bytes.to_vec()))
-    }
-}
-serialize_deserialize!(Data);
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 pub struct ZeiHybridCipher {
-    pub(crate) ciphertext: Ctext,
+    pub(crate) ciphertext: CompactByteArray,
     pub(crate) ephemeral_public_key: XPublicKey,
 }
 impl NoahFromToBytes for ZeiHybridCipher {
@@ -49,12 +37,12 @@ impl NoahFromToBytes for ZeiHybridCipher {
         bytes
     }
 
-    fn noah_from_bytes(bytes: &[u8]) -> Result<Self> {
+    fn noah_from_bytes(bytes: &[u8]) -> Result<Self, AlgebraError> {
         if bytes.len() < 32 {
-            Err(eg!(NoahError::DeserializationError))
+            Err(AlgebraError::DeserializationError)
         } else {
             let ephemeral_public_key = XPublicKey::noah_from_bytes(&bytes[0..32])?;
-            let ciphertext = Ctext::noah_from_bytes(&bytes[32..])?;
+            let ciphertext = CompactByteArray::noah_from_bytes(&bytes[32..])?;
             Ok(Self {
                 ciphertext,
                 ephemeral_public_key,
@@ -69,33 +57,33 @@ impl OwnerMemo {
         match self.blind_share.clone() {
             BlindShare::CompressedEdwardsY(bs) => NoahOwnerMemo {
                 key_type: KeyType::Ed25519,
-                blind_share_bytes: bs.noah_to_bytes(),
-                lock_bytes,
+                blind_share_bytes: CompactByteArray(bs.noah_to_bytes()),
+                lock_bytes: CompactByteArray(lock_bytes),
             },
             BlindShare::BlindShareData(_, v) => NoahOwnerMemo {
                 key_type: KeyType::Secp256k1,
-                blind_share_bytes: v.0,
-                lock_bytes,
+                blind_share_bytes: CompactByteArray(v.0),
+                lock_bytes: CompactByteArray(lock_bytes),
             },
         }
     }
 
-    pub fn from_noah(value: &NoahOwnerMemo) -> Result<Self> {
+    pub fn from_noah(value: &NoahOwnerMemo) -> Result<Self, NoahError> {
         match value.key_type {
             KeyType::Ed25519 => Ok(Self {
                 blind_share: BlindShare::CompressedEdwardsY(CompressedEdwardsY::from_slice(
-                    value.blind_share_bytes.as_slice(),
+                    value.blind_share_bytes.0.as_slice(),
                 )),
-                lock: ZeiHybridCipher::noah_from_bytes(&value.lock_bytes)?,
+                lock: ZeiHybridCipher::noah_from_bytes(&value.lock_bytes.0)?,
             }),
             KeyType::Secp256k1 => Ok(Self {
                 blind_share: BlindShare::BlindShareData(
                     String::from(SECP_KEY_IDENTIFIER),
-                    Data(value.blind_share_bytes.clone()),
+                    value.blind_share_bytes.clone(),
                 ),
-                lock: ZeiHybridCipher::noah_from_bytes(&value.lock_bytes)?,
+                lock: ZeiHybridCipher::noah_from_bytes(&value.lock_bytes.0)?,
             }),
-            KeyType::EthAddress => Err(eg!("not defined")),
+            KeyType::EthAddress => Err(NoahError::ParameterError),
         }
     }
 }
@@ -124,8 +112,8 @@ mod tests {
         {
             let (nom, _) = NoahOwnerMemo::from_amount(&mut prng, 12345u64, &ed_pk.0).unwrap();
             let oom = OldOwnerMemo {
-                blind_share: CompressedEdwardsY::from_slice(nom.blind_share_bytes.as_slice()),
-                lock: ZeiHybridCipher::noah_from_bytes(nom.lock_bytes.as_slice()).unwrap(),
+                blind_share: CompressedEdwardsY::from_slice(nom.blind_share_bytes.0.as_slice()),
+                lock: ZeiHybridCipher::noah_from_bytes(nom.lock_bytes.0.as_slice()).unwrap(),
             };
 
             let oom_bytes = serde_json::to_string(&oom).unwrap();
@@ -136,8 +124,8 @@ mod tests {
         {
             let (nom, _) = NoahOwnerMemo::from_asset_type(&mut prng, &at, &ed_pk.0).unwrap();
             let oom = OldOwnerMemo {
-                blind_share: CompressedEdwardsY::from_slice(nom.blind_share_bytes.as_slice()),
-                lock: ZeiHybridCipher::noah_from_bytes(nom.lock_bytes.as_slice()).unwrap(),
+                blind_share: CompressedEdwardsY::from_slice(nom.blind_share_bytes.0.as_slice()),
+                lock: ZeiHybridCipher::noah_from_bytes(nom.lock_bytes.0.as_slice()).unwrap(),
             };
 
             let oom_bytes = serde_json::to_string(&oom).unwrap();
@@ -150,8 +138,8 @@ mod tests {
                 NoahOwnerMemo::from_amount_and_asset_type(&mut prng, 983456u64, &at, &ed_pk.0)
                     .unwrap();
             let oom = OldOwnerMemo {
-                blind_share: CompressedEdwardsY::from_slice(nom.blind_share_bytes.as_slice()),
-                lock: ZeiHybridCipher::noah_from_bytes(nom.lock_bytes.as_slice()).unwrap(),
+                blind_share: CompressedEdwardsY::from_slice(nom.blind_share_bytes.0.as_slice()),
+                lock: ZeiHybridCipher::noah_from_bytes(nom.lock_bytes.0.as_slice()).unwrap(),
             };
 
             let oom_bytes = serde_json::to_string(&oom).unwrap();

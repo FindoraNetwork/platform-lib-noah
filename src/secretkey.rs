@@ -1,4 +1,5 @@
 use noah::keys::KeyType::Ed25519;
+use noah::NoahError;
 use {
     crate::{signature::XfrSignature, XfrKeyPair, XfrPublicKey},
     ed25519_dalek::SECRET_KEY_LENGTH as ED25519_SECRET_KEY_LENGTH,
@@ -18,7 +19,7 @@ impl XfrSecretKey {
     pub fn to_bytes(&self) -> Vec<u8> {
         self.noah_to_bytes()
     }
-    pub fn sign(&self, message: &[u8]) -> Result<XfrSignature> {
+    pub fn sign(&self, message: &[u8]) -> Result<XfrSignature, NoahError> {
         let sig = self.0.sign(message)?;
         Ok(XfrSignature::from_noah(&sig)?)
     }
@@ -29,11 +30,11 @@ impl XfrSecretKey {
             sec_key: XfrSecretKey(nkp.get_sk()),
         }
     }
-    pub fn into_noah(&self) -> Result<NoahXfrSecretKey> {
+    pub fn into_noah(&self) -> Result<NoahXfrSecretKey, NoahError> {
         Ok(self.0.clone())
     }
 
-    pub fn from_noah(value: &NoahXfrSecretKey) -> Result<Self> {
+    pub fn from_noah(value: &NoahXfrSecretKey) -> Result<Self, NoahError> {
         Ok(Self(value.clone()))
     }
 }
@@ -49,7 +50,7 @@ impl NoahFromToBytes for XfrSecretKey {
         }
     }
 
-    fn noah_from_bytes(bytes: &[u8]) -> Result<Self> {
+    fn noah_from_bytes(bytes: &[u8]) -> Result<Self, AlgebraError> {
         Ok(Self(NoahXfrSecretKey::noah_from_bytes(bytes)?))
     }
 }
