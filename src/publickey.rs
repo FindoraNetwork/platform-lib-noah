@@ -34,7 +34,7 @@ impl XfrPublicKey {
     }
 
     pub fn from_noah(value: &NoahXfrPublicKey) -> Result<Self, NoahError> {
-        Ok(Self(value.clone()))
+        Ok(Self(*value))
     }
 
     pub fn is_ed25519(&self) -> bool {

@@ -21,7 +21,7 @@ impl XfrSecretKey {
     }
     pub fn sign(&self, message: &[u8]) -> Result<XfrSignature, NoahError> {
         let sig = self.0.sign(message)?;
-        Ok(XfrSignature::from_noah(&sig)?)
+        XfrSignature::from_noah(&sig)
     }
     pub fn into_keypair(&self) -> XfrKeyPair {
         let nkp = self.0.clone().into_keypair();

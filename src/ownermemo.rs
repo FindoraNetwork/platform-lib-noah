@@ -5,7 +5,7 @@ use {
     },
     noah_algebra::{prelude::*, serialization::NoahFromToBytes},
     noah_crypto::hybrid_encryption::XPublicKey,
-    serde::{Deserialize, Serialize, Serializer},
+    serde::{Deserialize, Serialize},
 };
 
 const SECP_KEY_IDENTIFIER: &str = "secp";

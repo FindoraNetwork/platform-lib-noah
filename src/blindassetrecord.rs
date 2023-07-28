@@ -6,7 +6,6 @@ use {
         structs::BlindAssetRecord as NoahBlindAssetRecord,
         structs::{XfrAmount, XfrAssetType},
     },
-    noah_algebra::prelude::*,
     serde::{Deserialize, Serialize},
 };
 
