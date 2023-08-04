@@ -7,11 +7,16 @@ edition = "2021"
 [dependencies]
 wasm-bindgen = { version = "0.2", features = ["serde-serialize"] }
 serde = { version = "1.0.124", features = ["derive"] }
-noah  = { git = "https://github.com/FindoraNetwork/noah", tag = "v0.4.9-1" }
-noah-crypto = { git = "https://github.com/FindoraNetwork/noah", tag = "v0.4.9-1" }
-noah-algebra  = { git = "https://github.com/FindoraNetwork/noah", tag = "v0.4.9-1" }
-noah-accumulators  = { git = "https://github.com/FindoraNetwork/noah", tag = "v0.4.9-1" }
+noah  = { git = "https://github.com/FindoraNetwork/noah", tag = "v0.5.4" }
+noah-crypto = { git = "https://github.com/FindoraNetwork/noah", tag = "v0.5.4" }
+noah-algebra  = { git = "https://github.com/FindoraNetwork/noah", tag = "v0.5.4" }
+noah-accumulators  = { git = "https://github.com/FindoraNetwork/noah", tag = "v0.5.4" }
 ed25519-dalek = { package = "noah-ed25519-dalek", version = "4.0.0" }
+
+[dev-dependencies]
+rand_chacha = "0.3"
+serde_json = "1.0.97"
+base64 = "0.21.2"
 
 [features]
 lightweight = [ "noah/lightweight" ] # Minimize size for only AR2ABAR and ABAR2AR.

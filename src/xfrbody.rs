@@ -1,3 +1,4 @@
+use noah::NoahError;
 use {
     crate::{BlindAssetRecord, OwnerMemo},
     noah::xfr::structs::{TracerMemo, XfrBody as NoahXfrBody, XfrProofs},
@@ -19,7 +20,7 @@ pub struct XfrBody {
     pub owners_memos: Vec<Option<OwnerMemo>>, // If confidential amount or asset type, lock the amount and/or asset type to the public key in asset_record
 }
 impl XfrBody {
-    pub fn into_noah(&self) -> Result<NoahXfrBody> {
+    pub fn into_noah(&self) -> Result<NoahXfrBody, NoahError> {
         Ok(NoahXfrBody {
             inputs: self
                 .inputs
@@ -41,17 +42,17 @@ impl XfrBody {
         })
     }
 
-    pub fn from_noah(value: &NoahXfrBody) -> Result<Self> {
+    pub fn from_noah(value: &NoahXfrBody) -> Result<Self, NoahError> {
         Ok(Self {
             inputs: value
                 .inputs
                 .iter()
-                .map(|it| BlindAssetRecord::from_noah(&it).unwrap())
+                .map(|it| BlindAssetRecord::from_noah(it).unwrap())
                 .collect(),
             outputs: value
                 .outputs
                 .iter()
-                .map(|it| BlindAssetRecord::from_noah(&it).unwrap())
+                .map(|it| BlindAssetRecord::from_noah(it).unwrap())
                 .collect(),
             proofs: value.proofs.clone(),
             asset_tracing_memos: value.asset_tracing_memos.clone(),
