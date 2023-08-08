@@ -2,7 +2,8 @@ use {
     noah::ristretto::CompressedEdwardsY,
     noah::{keys::KeyType, xfr::structs::OwnerMemo as NoahOwnerMemo},
     noah_algebra::{prelude::*, serialization::NoahFromToBytes},
-    noah_crypto::basic::hybrid_encryption::{Ctext, XPublicKey},
+    noah_crypto::hybrid_encryption::{XPublicKey},
+    ruc::*,
     serde::{Deserialize, Serialize},
 };
 /// Information directed to secret key holder of a BlindAssetRecord
@@ -14,7 +15,7 @@ pub struct OwnerMemo {
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 pub struct ZeiHybridCipher {
-    pub(crate) ciphertext: Ctext,
+    pub(crate) ciphertext: CompactByteArray,
     pub(crate) ephemeral_public_key: XPublicKey,
 }
 impl NoahFromToBytes for ZeiHybridCipher {
@@ -25,12 +26,12 @@ impl NoahFromToBytes for ZeiHybridCipher {
         bytes
     }
 
-    fn noah_from_bytes(bytes: &[u8]) -> Result<Self> {
+    fn noah_from_bytes(bytes: &[u8]) -> core::result::Result<Self, AlgebraError> {
         if bytes.len() < 32 {
-            Err(eg!(NoahError::DeserializationError))
+            Err(AlgebraError::DeserializationError)
         } else {
             let ephemeral_public_key = XPublicKey::noah_from_bytes(&bytes[0..32])?;
-            let ciphertext = Ctext::noah_from_bytes(&bytes[32..])?;
+            let ciphertext = CompactByteArray::noah_from_bytes(&bytes[32..])?;
             Ok(Self {
                 ciphertext,
                 ephemeral_public_key,
@@ -42,15 +43,15 @@ impl OwnerMemo {
     pub fn into_noah(&self) -> NoahOwnerMemo {
         NoahOwnerMemo {
             key_type: KeyType::Ed25519,
-            blind_share_bytes: self.blind_share.to_bytes().to_vec(),
-            lock_bytes: self.lock.noah_to_bytes(),
+            blind_share_bytes: CompactByteArray(self.blind_share.to_bytes().to_vec()),
+            lock_bytes: CompactByteArray(self.lock.noah_to_bytes()),
         }
     }
 
     pub fn from_noah(value: &NoahOwnerMemo) -> Result<Self> {
         Ok(Self {
-            blind_share: CompressedEdwardsY::from_slice(&value.blind_share_bytes),
-            lock: ZeiHybridCipher::noah_from_bytes(&value.lock_bytes)?,
+            blind_share: CompressedEdwardsY::from_slice(&value.blind_share_bytes.0),
+            lock: ZeiHybridCipher::noah_from_bytes(&value.lock_bytes.0).c(d!())?,
         })
     }
 }

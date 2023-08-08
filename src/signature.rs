@@ -6,6 +6,7 @@ use {
     },
     noah_algebra::{prelude::*, serialization::NoahFromToBytes},
     serde::Serializer,
+    ruc::*,
 };
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -41,7 +42,10 @@ impl NoahFromToBytes for XfrSignature {
         self.to_bytes().to_vec()
     }
 
-    fn noah_from_bytes(bytes: &[u8]) -> Result<Self> {
-        XfrSignature::from_bytes(bytes)
+    fn noah_from_bytes(bytes: &[u8]) -> core::result::Result<Self, AlgebraError> {
+        match XfrSignature::from_bytes(bytes) {
+            Ok(x) => {Ok(x)}
+            Err(_) => {Err(AlgebraError::DeserializationError)}
+        }
     }
 }

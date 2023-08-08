@@ -3,6 +3,7 @@ use {
     ed25519_dalek::{PublicKey, SecretKey},
     noah::keys::KeyPair as NoahXfrKeyPair,
     noah_algebra::prelude::*,
+    ruc::*,
     serde::{Deserialize, Serialize},
     wasm_bindgen::prelude::*,
 };
@@ -62,18 +63,26 @@ impl NoahFromToBytes for XfrKeyPair {
         vec
     }
 
-    fn noah_from_bytes(bytes: &[u8]) -> Result<Self> {
+    fn noah_from_bytes(bytes: &[u8]) -> core::result::Result<Self, AlgebraError> {
         if bytes.len() == 64 {
+            let sk = match SecretKey::from_bytes(&bytes[0..32]) {
+                Ok(a) => {Ok(a)}
+                Err(_) => {Err(AlgebraError::DeserializationError)}
+            }?;
+            let pk = match PublicKey::from_bytes(&bytes[32..64]) {
+                Ok(a) => {Ok(a)}
+                Err(_) => {Err(AlgebraError::DeserializationError)}
+            }?;
             Ok(XfrKeyPair {
                 sec_key: XfrSecretKey(
-                    SecretKey::from_bytes(&bytes[0..32]).c(d!(NoahError::DeserializationError))?,
+                    sk,
                 ),
                 pub_key: XfrPublicKey(
-                    PublicKey::from_bytes(&bytes[32..64]).c(d!(NoahError::DeserializationError))?,
+                    pk,
                 ),
             })
         } else {
-            Err(eg!("length must be 64"))
+            Err(AlgebraError::DeserializationError)
         }
     }
 }

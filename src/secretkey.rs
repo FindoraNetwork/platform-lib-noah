@@ -11,6 +11,7 @@ use {
         prelude::*,
         serialization::NoahFromToBytes,
     },
+    ruc::*,
     serde::Serializer,
 };
 
@@ -29,12 +30,12 @@ impl XfrSecretKey {
             .c(d!(NoahError::DeserializationError))
     }
     pub fn sign(&self, message: &[u8]) -> Result<XfrSignature> {
-        let sk: NoahXfrSecretKey = self.clone().into_noah()?;
-        sk.sign(message).and_then(|sign| {
+        let sk: NoahXfrSecretKey = self.clone().into_noah().c(d!())?;
+        sk.sign(message).c(d!()).and_then(|sign| {
             if let NoahXfrSignature::Ed25519(v) = sign {
                 Ok(XfrSignature(v))
             } else {
-                Err(eg!("signature type error"))
+                Err(NoahError::SignatureError).c(d!())
             }
         })
     }
@@ -64,8 +65,11 @@ impl NoahFromToBytes for XfrSecretKey {
         self.to_bytes().to_vec()
     }
 
-    fn noah_from_bytes(bytes: &[u8]) -> Result<Self> {
-        Self::from_bytes(bytes)
+    fn noah_from_bytes(bytes: &[u8]) -> core::result::Result<Self, AlgebraError> {
+        match Self::from_bytes(bytes) {
+            Ok(a) => {Ok(a)}
+            Err(_) => {Err(AlgebraError::DeserializationError)}
+        }
     }
 }
 

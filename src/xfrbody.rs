@@ -2,6 +2,7 @@ use {
     crate::{BlindAssetRecord, OwnerMemo},
     noah::xfr::structs::{TracerMemo, XfrBody as NoahXfrBody, XfrProofs},
     noah_algebra::prelude::*,
+    ruc::*,
     serde::{Deserialize, Serialize},
 };
 /// A confidential transfer body.

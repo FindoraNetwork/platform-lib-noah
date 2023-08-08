@@ -5,7 +5,7 @@ use {
         structs::BlindAssetRecord as NoahBlindAssetRecord,
         structs::{XfrAmount, XfrAssetType},
     },
-    noah_algebra::prelude::*,
+    ruc::*,
     serde::{Deserialize, Serialize},
 };
 /// A transfer input or output record as seen in the ledger

@@ -8,6 +8,7 @@ use {
         prelude::*,
         serialization::NoahFromToBytes,
     },
+    ruc::*,
     serde::Serializer,
     wasm_bindgen::prelude::*,
 };
@@ -30,7 +31,7 @@ impl XfrPublicKey {
     }
     pub fn verify(&self, message: &[u8], signature: &XfrSignature) -> Result<()> {
         let pk: NoahXfrPublicKey = self.clone().into_noah()?;
-        pk.verify(message, &signature.into_noah()?)
+        pk.verify(message, &signature.into_noah()?).c(d!())
     }
 
     pub fn into_noah(&self) -> Result<NoahXfrPublicKey> {
@@ -51,8 +52,11 @@ impl NoahFromToBytes for XfrPublicKey {
         self.to_bytes().to_vec()
     }
 
-    fn noah_from_bytes(bytes: &[u8]) -> Result<Self> {
-        Self::from_bytes(bytes)
+    fn noah_from_bytes(bytes: &[u8]) -> core::result::Result<Self, AlgebraError> {
+        match Self::from_bytes(bytes) {
+            Ok(a) => {Ok(a)}
+            Err(_) => {Err(AlgebraError::DeserializationError)}
+        }
     }
 }
 
