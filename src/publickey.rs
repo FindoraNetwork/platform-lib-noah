@@ -26,15 +26,15 @@ impl XfrPublicKey {
     }
 
     pub fn verify(&self, message: &[u8], signature: &XfrSignature) -> Result<(), NoahError> {
-        self.0.verify(message, &signature.into_noah()?)
+        self.0.verify(message, &signature.into_noah())
     }
 
-    pub fn into_noah(&self) -> Result<NoahXfrPublicKey, NoahError> {
-        Ok(self.0)
+    pub fn into_noah(&self) -> NoahXfrPublicKey {
+        self.0
     }
 
-    pub fn from_noah(value: &NoahXfrPublicKey) -> Result<Self, NoahError> {
-        Ok(Self(*value))
+    pub fn from_noah(value: &NoahXfrPublicKey) -> Self {
+        Self(*value)
     }
 
     pub fn is_ed25519(&self) -> bool {

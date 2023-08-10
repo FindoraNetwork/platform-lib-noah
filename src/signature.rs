@@ -1,7 +1,7 @@
-use noah::keys::KeyType;
-use noah::NoahError;
 use {
-    noah::keys::Signature as NoahXfrSignature,
+    noah::keys::{
+        KeyType, Signature as NoahXfrSignature
+    },
     noah_algebra::{prelude::*, serialization::NoahFromToBytes},
     serde::Serializer,
 };
@@ -12,12 +12,12 @@ pub struct XfrSignature(pub NoahXfrSignature);
 serialize_deserialize!(XfrSignature);
 
 impl XfrSignature {
-    pub fn into_noah(&self) -> Result<NoahXfrSignature, NoahError> {
-        Ok(self.0.clone())
+    pub fn into_noah(&self) -> NoahXfrSignature {
+        self.0.clone()
     }
 
-    pub fn from_noah(value: &NoahXfrSignature) -> Result<Self, NoahError> {
-        Ok(Self(value.clone()))
+    pub fn from_noah(value: &NoahXfrSignature) -> Self {
+        Self(value.clone())
     }
 }
 

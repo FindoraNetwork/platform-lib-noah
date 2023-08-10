@@ -1,4 +1,3 @@
-use noah::NoahError;
 use {
     crate::publickey::XfrPublicKey,
     noah::xfr::{
@@ -32,19 +31,19 @@ impl BlindAssetRecord {
             AssetRecordType::NonConfidentialAmount_NonConfidentialAssetType
         )
     }
-    pub fn into_noah(&self) -> Result<NoahBlindAssetRecord, NoahError> {
-        Ok(NoahBlindAssetRecord {
+    pub fn into_noah(&self) -> NoahBlindAssetRecord {
+        NoahBlindAssetRecord {
             amount: self.amount.clone(),
             asset_type: self.asset_type.clone(),
-            public_key: self.public_key.into_noah()?,
-        })
+            public_key: self.public_key.into_noah(),
+        }
     }
 
-    pub fn from_noah(value: &NoahBlindAssetRecord) -> Result<Self, NoahError> {
-        Ok(Self {
+    pub fn from_noah(value: &NoahBlindAssetRecord) -> Self {
+        Self {
             amount: value.amount.clone(),
             asset_type: value.asset_type.clone(),
-            public_key: XfrPublicKey::from_noah(&value.public_key)?,
-        })
+            public_key: XfrPublicKey::from_noah(&value.public_key),
+        }
     }
 }

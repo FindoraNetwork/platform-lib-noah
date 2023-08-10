@@ -31,12 +31,12 @@ impl XfrKeyPair {
         }
     }
 
-    pub fn into_noah(&self) -> Result<NoahXfrKeyPair, NoahError> {
-        self.sec_key.clone().into_noah().map(|sk| sk.into_keypair())
+    pub fn into_noah(&self) -> NoahXfrKeyPair {
+        self.sec_key.clone().into_noah().into_keypair()
     }
 
-    pub fn from_noah(value: &NoahXfrKeyPair) -> Result<Self, NoahError> {
-        XfrSecretKey::from_noah(value.get_sk_ref()).map(|sk| sk.into_keypair())
+    pub fn from_noah(value: &NoahXfrKeyPair) -> Self {
+        XfrSecretKey::from_noah(value.get_sk_ref()).into_keypair()
     }
 
     pub fn sign(&self, msg: &[u8]) -> Result<XfrSignature, NoahError> {

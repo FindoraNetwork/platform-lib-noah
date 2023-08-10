@@ -21,7 +21,7 @@ impl XfrSecretKey {
     }
     pub fn sign(&self, message: &[u8]) -> Result<XfrSignature, NoahError> {
         let sig = self.0.sign(message)?;
-        XfrSignature::from_noah(&sig)
+        Ok(XfrSignature::from_noah(&sig))
     }
     pub fn into_keypair(&self) -> XfrKeyPair {
         let nkp = self.0.clone().into_keypair();
@@ -30,12 +30,12 @@ impl XfrSecretKey {
             sec_key: XfrSecretKey(nkp.get_sk()),
         }
     }
-    pub fn into_noah(&self) -> Result<NoahXfrSecretKey, NoahError> {
-        Ok(self.0.clone())
+    pub fn into_noah(&self) -> NoahXfrSecretKey {
+        self.0.clone()
     }
 
-    pub fn from_noah(value: &NoahXfrSecretKey) -> Result<Self, NoahError> {
-        Ok(Self(value.clone()))
+    pub fn from_noah(value: &NoahXfrSecretKey) -> Self{
+        Self(value.clone())
     }
 }
 

@@ -25,12 +25,12 @@ impl XfrBody {
             inputs: self
                 .inputs
                 .iter()
-                .map(|it| it.into_noah().unwrap())
+                .map(|it| it.into_noah())
                 .collect(),
             outputs: self
                 .outputs
                 .iter()
-                .map(|it| it.into_noah().unwrap())
+                .map(|it| it.into_noah())
                 .collect(),
             proofs: self.proofs.clone(),
             asset_tracing_memos: self.asset_tracing_memos.clone(),
@@ -47,12 +47,12 @@ impl XfrBody {
             inputs: value
                 .inputs
                 .iter()
-                .map(|it| BlindAssetRecord::from_noah(it).unwrap())
+                .map(|it| BlindAssetRecord::from_noah(it))
                 .collect(),
             outputs: value
                 .outputs
                 .iter()
-                .map(|it| BlindAssetRecord::from_noah(it).unwrap())
+                .map(|it| BlindAssetRecord::from_noah(it))
                 .collect(),
             proofs: value.proofs.clone(),
             asset_tracing_memos: value.asset_tracing_memos.clone(),
